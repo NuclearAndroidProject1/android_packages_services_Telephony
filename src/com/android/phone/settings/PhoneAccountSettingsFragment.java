@@ -53,7 +53,6 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
     private static final String SIP_RECEIVE_CALLS_PREF_KEY = "sip_receive_calls_key";
 
     private static final String SHOW_DURATION_KEY = "duration_enable_key";
-    private static final String BUTTON_VIBRATE_CONNECTED_KEY = "button_vibrate_after_connected";
 
     private static final String LEGACY_ACTION_CONFIGURE_PHONE_ACCOUNT =
             "android.telecom.action.CONNECTION_SERVICE_CONFIGURE";
@@ -80,8 +79,7 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
     private CheckBoxPreference mSipReceiveCallsPreference;
     private SipSharedPreferences mSipSharedPreferences;
 
-    private CheckBoxPreference mShowDurationCheckBox;
-    private CheckBoxPreference mVibrateAfterConnected;
+    private SwitchPreference mShowDurationSwitch;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -200,14 +198,6 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
                     mShowDurationCheckBox.setSummary(checked ? R.string.duration_enable_summary
                             : R.string.duration_disable_summary);
         }
-
-        mVibrateAfterConnected = (CheckBoxPreference) findPreference(BUTTON_VIBRATE_CONNECTED_KEY);
-        if (mVibrateAfterConnected != null) {
-            mVibrateAfterConnected.setOnPreferenceChangeListener(this);
-            boolean checked = Settings.System.getInt(getContext().getContentResolver(),
-                    Constants.SETTINGS_VIBRATE_WHEN_ACCEPTED, 1) == 1;
-            mVibrateAfterConnected.setChecked(checked);
-        }
     }
 
     /**
@@ -239,11 +229,6 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
                     Constants.SETTINGS_SHOW_CALL_DURATION, checked ? 1 : 0);
             mShowDurationCheckBox.setSummary(checked ? R.string.duration_enable_summary
                     : R.string.duration_disable_summary);
-            return true;
-        } else if (pref == mVibrateAfterConnected) {
-            boolean doVibrate = (Boolean) objValue;
-            Settings.System.putInt(getContext().getContentResolver(),
-                    Constants.SETTINGS_VIBRATE_WHEN_ACCEPTED, doVibrate ? 1 : 0);
             return true;
         }
         return false;
