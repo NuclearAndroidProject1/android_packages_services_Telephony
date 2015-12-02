@@ -286,20 +286,6 @@ public class CallFeaturesSetting extends PreferenceActivity
             /* tm.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE); */
         }
 
-        if (mShowDurationCheckBox != null) {
-            boolean checked = Settings.System.getInt(getContentResolver(),
-                    Constants.SETTINGS_SHOW_CALL_DURATION, 1) == 1;
-                    mShowDurationCheckBox.setChecked(checked);
-                    mShowDurationCheckBox.setSummary(checked ? R.string.duration_enable_summary
-                            : R.string.duration_disable_summary);
-        }
-
-        Preference imsSettings = findPreference(IMS_SETTINGS_KEY);
-
-        if (!isPackageInstalled(this, QTI_IMS_PACKAGE_NAME)) {
-            prefSet.removePreference(imsSettings);
-        }
-
         Preference wifiCallingSettings = findPreference(
                 getResources().getString(R.string.wifi_calling_settings_key));
 
