@@ -897,6 +897,14 @@ abstract class TelephonyConnection extends Connection {
         }
         mIsMultiParty = mOriginalConnection.isMultiparty();
 
+        // updateState can set mOriginalConnection to null if its state is DISCONNECTED, so this
+        // should be executed *after* the above setters have run.
+        updateState();
+        if (mOriginalConnection == null) {
+            Log.w(this, "original Connection was nulled out as part of setOriginalConnection. " +
+                    originalConnection);
+        }
+
         fireOnOriginalConnectionConfigured();
     }
 
