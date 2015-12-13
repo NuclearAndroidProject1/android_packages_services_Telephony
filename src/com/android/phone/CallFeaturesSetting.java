@@ -286,6 +286,12 @@ public class CallFeaturesSetting extends PreferenceActivity
             /* tm.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE); */
         }
 
+        Preference imsSettings = findPreference(IMS_SETTINGS_KEY);
+
+        if (!isPackageInstalled(this, QTI_IMS_PACKAGE_NAME)) {
+            prefSet.removePreference(imsSettings);
+        }
+
         Preference wifiCallingSettings = findPreference(
                 getResources().getString(R.string.wifi_calling_settings_key));
 
