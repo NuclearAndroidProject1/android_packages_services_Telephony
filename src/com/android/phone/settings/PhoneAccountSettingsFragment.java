@@ -12,6 +12,7 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
+import android.provider.Settings;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
@@ -22,6 +23,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.telephony.Phone;
+import com.android.phone.Constants;
 import com.android.phone.PhoneUtils;
 import com.android.phone.R;
 import com.android.phone.SubscriptionInfoHelper;
@@ -44,8 +46,6 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
 
     private static final String DEFAULT_OUTGOING_ACCOUNT_KEY = "default_outgoing_account";
     private static final String ALL_CALLING_ACCOUNTS_KEY = "phone_account_all_calling_accounts";
-
-    private static final String BUTTON_XDIVERT_KEY = "button_xdivert";
 
     private static final String SIP_SETTINGS_CATEGORY_PREF_KEY =
             "phone_accounts_sip_settings_category_key";
@@ -150,15 +150,6 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
             }
         } else {
             getPreferenceScreen().removePreference(mAccountList);
-        }
-
-        if (TelephonyManager.getDefault().getMultiSimConfiguration() !=
-                 TelephonyManager.MultiSimVariants.DSDS) {
-            Preference mXDivertPref = getPreferenceScreen().findPreference(BUTTON_XDIVERT_KEY);
-            if (mXDivertPref != null) {
-                Log.d(LOG_TAG, "Remove xdivert preference: ");
-                getPreferenceScreen().removePreference(mXDivertPref);
-            }
         }
 
         if (SipUtil.isVoipSupported(getActivity())) {
