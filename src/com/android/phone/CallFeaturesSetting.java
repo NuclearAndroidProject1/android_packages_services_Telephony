@@ -31,12 +31,15 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.os.PowerManager;
 import android.os.UserHandle;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
+import android.preference.SlimSeekBarPreference;
+import android.preference.SwitchPreference;
 import android.provider.Settings;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
@@ -96,6 +99,11 @@ public class CallFeaturesSetting extends PreferenceActivity
     private static final String VOICEMAIL_SETTING_SCREEN_PREF_KEY = "button_voicemail_category_key";
     private static final String BUTTON_FDN_KEY   = "button_fdn_key";
     private static final String BUTTON_RETRY_KEY       = "button_auto_retry_key";
+
+    private static final String PROX_AUTO_SPEAKER  = "prox_auto_speaker";
+    private static final String PROX_AUTO_SPEAKER_DELAY  = "prox_auto_speaker_delay";
+    private static final String PROX_AUTO_SPEAKER_INCALL_ONLY  = "prox_auto_speaker_incall_only";
+
     private static final String BUTTON_GSM_UMTS_OPTIONS = "button_gsm_more_expand_key";
     private static final String BUTTON_CDMA_OPTIONS = "button_cdma_more_expand_key";
     private static final String SHOW_DURATION_KEY      = "duration_enable_key";
@@ -107,6 +115,8 @@ public class CallFeaturesSetting extends PreferenceActivity
 
     private static final String ENABLE_VIDEO_CALLING_KEY = "button_enable_video_calling";
 
+    private static final String BUTTON_PROXIMITY_KEY   = "button_proximity_key";
+
     private Phone mPhone;
     private SubscriptionInfoHelper mSubscriptionInfoHelper;
     private TelecomManager mTelecomManager;
@@ -114,6 +124,11 @@ public class CallFeaturesSetting extends PreferenceActivity
     private CheckBoxPreference mButtonAutoRetry;
     private PreferenceScreen mVoicemailSettingsScreen;
     private CheckBoxPreference mEnableVideoCalling;
+    private SwitchPreference mButtonProximity;
+
+    private SwitchPreference mProxSpeaker;
+    private SlimSeekBarPreference mProxSpeakerDelay;
+    private SwitchPreference mProxSpeakerIncallOnly;
 
     /*
      * Click Listeners, handle click based on objects attached to UI.
@@ -127,6 +142,23 @@ public class CallFeaturesSetting extends PreferenceActivity
                     android.provider.Settings.Global.CALL_AUTO_RETRY,
                     mButtonAutoRetry.isChecked() ? 1 : 0);
             return true;
+        } else if (preference == mButtonProximity) {
+            int checked = mButtonProximity.isChecked() ? 1 : 0;
+            Settings.System.putInt(mPhone.getContext().getContentResolver(),
+                    Settings.System.IN_CALL_PROXIMITY_SENSOR, checked);
+            if (checked == 1) {
+                mButtonProximity.setSummary(R.string.proximity_on_summary);
+            } else {
+                mButtonProximity.setSummary(R.string.proximity_off_summary);
+            }
+            return true;
+        } else if (preference == mProxSpeaker) {
+            Settings.System.putInt(getContentResolver(), Settings.System.PROXIMITY_AUTO_SPEAKER,
+                    mProxSpeaker.isChecked() ? 1 : 0);
+        } else if (preference == mProxSpeakerIncallOnly) {
+            Settings.System.putInt(getContentResolver(),
+                    Settings.System.PROXIMITY_AUTO_SPEAKER_INCALL_ONLY,
+                    mProxSpeakerIncallOnly.isChecked() ? 1 : 0);
         }
         return false;
     }
@@ -165,6 +197,10 @@ public class CallFeaturesSetting extends PreferenceActivity
                         .show();
                 return false;
             }
+        } else if (preference == mProxSpeakerDelay) {
+            int delay = Integer.valueOf((String) objValue);
+            Settings.System.putInt(getContentResolver(),
+                    Settings.System.PROXIMITY_AUTO_SPEAKER_DELAY, delay);
         }
 
         // Always let the preference setting proceed.
@@ -175,6 +211,8 @@ public class CallFeaturesSetting extends PreferenceActivity
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         if (DBG) log("onCreate: Intent is " + getIntent());
+	
+	PreferenceScreen preferenceScreen = getPreferenceScreen();
 
         // Make sure we are running as the primary user.
         if (UserHandle.myUserId() != UserHandle.USER_OWNER) {
@@ -189,6 +227,15 @@ public class CallFeaturesSetting extends PreferenceActivity
                 getActionBar(), getResources(), R.string.call_settings_with_label);
         mPhone = mSubscriptionInfoHelper.getPhone();
         mTelecomManager = TelecomManager.from(this);
+
+        if (mButtonProximity != null) {
+            if (getResources().getBoolean(R.bool.config_proximity_enable)) {
+                mButtonProximity.setOnPreferenceChangeListener(this);
+            } else {
+                getPreferenceScreen().removePreference(mButtonProximity);
+                mButtonProximity = null;
+            }
+        }
     }
 
     @Override
@@ -220,6 +267,18 @@ public class CallFeaturesSetting extends PreferenceActivity
 
         mEnableVideoCalling = (CheckBoxPreference) findPreference(ENABLE_VIDEO_CALLING_KEY);
 
+        mProxSpeaker = (SwitchPreference) findPreference(PROX_AUTO_SPEAKER);
+        mProxSpeakerIncallOnly = (SwitchPreference) findPreference(PROX_AUTO_SPEAKER_INCALL_ONLY);
+        mProxSpeakerDelay = (SlimSeekBarPreference) findPreference(PROX_AUTO_SPEAKER_DELAY);
+        if (mProxSpeakerDelay != null) {
+            mProxSpeakerDelay.setDefault(100);
+            mProxSpeakerDelay.isMilliseconds(true);
+            mProxSpeakerDelay.setInterval(1);
+            mProxSpeakerDelay.minimumValue(100);
+            mProxSpeakerDelay.multiplyValue(100);
+            mProxSpeakerDelay.setOnPreferenceChangeListener(this);
+        }
+
         PersistableBundle carrierConfig =
                 PhoneGlobals.getInstance().getCarrierConfigForSubId(mPhone.getSubId());
 
@@ -233,10 +292,46 @@ public class CallFeaturesSetting extends PreferenceActivity
             mButtonAutoRetry = null;
         }
 
+        mButtonProximity = (SwitchPreference) findPreference(BUTTON_PROXIMITY_KEY);
+
         Preference cdmaOptions = prefSet.findPreference(BUTTON_CDMA_OPTIONS);
         Preference gsmOptions = prefSet.findPreference(BUTTON_GSM_UMTS_OPTIONS);
         Preference fdnButton = prefSet.findPreference(BUTTON_FDN_KEY);
         fdnButton.setIntent(mSubscriptionInfoHelper.getIntent(FdnSetting.class));
+
+        final ContentResolver contentResolver = getContentResolver();
+
+        if (mProxSpeaker != null) {
+            PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
+            if (pm.isWakeLockLevelSupported(
+                    PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK)
+                    && getResources().getBoolean(R.bool.config_enabled_speakerprox)) {
+                mProxSpeaker.setChecked(Settings.System.getInt(contentResolver,
+                        Settings.System.PROXIMITY_AUTO_SPEAKER, 0) == 1);
+                if (mProxSpeakerIncallOnly != null) {
+                    mProxSpeakerIncallOnly.setChecked(Settings.System.getInt(contentResolver,
+                            Settings.System.PROXIMITY_AUTO_SPEAKER_INCALL_ONLY, 0) == 1);
+                }
+                if (mProxSpeakerDelay != null) {
+                    final int proxDelay = Settings.System.getInt(getContentResolver(),
+                            Settings.System.PROXIMITY_AUTO_SPEAKER_DELAY, 100);
+                    // minimum 100 is 1 interval of the 100 multiplier
+                    mProxSpeakerDelay.setInitValue((proxDelay / 100) - 1);
+                }
+            } else {
+                prefSet.removePreference(mProxSpeaker);
+                mProxSpeaker = null;
+                if (mProxSpeakerIncallOnly != null) {
+                    prefSet.removePreference(mProxSpeakerIncallOnly);
+                    mProxSpeakerIncallOnly = null;
+                }
+                if (mProxSpeakerDelay != null) {
+                    prefSet.removePreference(mProxSpeakerDelay);
+                    mProxSpeakerDelay = null;
+                }
+            }
+        }
+
         if (carrierConfig.getBoolean(CarrierConfigManager.KEY_WORLD_PHONE_BOOL)) {
             cdmaOptions.setIntent(mSubscriptionInfoHelper.getIntent(CdmaCallOptions.class));
             gsmOptions.setIntent(mSubscriptionInfoHelper.getIntent(GsmUmtsCallOptions.class));
@@ -328,6 +423,14 @@ public class CallFeaturesSetting extends PreferenceActivity
             }
             wifiCallingSettings.setSummary(resId);
         }
+        if (mButtonProximity != null) {
+            boolean checked = Settings.System.getInt(getContentResolver(),
+                    Settings.System.IN_CALL_PROXIMITY_SENSOR, 1) == 1;
+           mButtonProximity.setChecked(checked);
+            mButtonProximity.setSummary(checked ? R.string.proximity_on_summary
+                    : R.string.proximity_off_summary);
+        }
+
     }
 
     public static boolean isPackageInstalled(Context context, String pkg, boolean ignoreState) {
