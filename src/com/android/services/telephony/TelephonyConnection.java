@@ -117,9 +117,10 @@ abstract class TelephonyConnection extends Connection {
                             ((connection.getAddress() != null &&
                             mOriginalConnection.getAddress() != null &&
                             mOriginalConnection.getAddress().contains(connection.getAddress())) ||
-                            mOriginalConnection.getStateBeforeHandover() == connection.getState())) {
-                            Log.d(TelephonyConnection.this, "SettingOriginalConnection " +
-                                    mOriginalConnection.toString() + " with " + connection.toString());
+                            connection.getState() == mOriginalConnection.getStateBeforeHandover())) {
+                            Log.d(TelephonyConnection.this,
+                                    "SettingOriginalConnection " + mOriginalConnection.toString()
+                                            + " with " + connection.toString());
                             setOriginalConnection(connection);
                             mWasImsConnection = false;
                         }
@@ -832,7 +833,7 @@ abstract class TelephonyConnection extends Connection {
         if (mOriginalConnection != null) {
             if (((getAddress() != null) &&
                     (getPhone().getPhoneType() == TelephonyManager.PHONE_TYPE_CDMA)) &&
-                    !isValidRingingCall()) {
+                    !mOriginalConnection.isIncoming()) {
                 address = getAddressFromNumber(mOriginalConnection.getOrigDialString());
             } else {
                 address = getAddressFromNumber(mOriginalConnection.getAddress());
@@ -882,10 +883,6 @@ abstract class TelephonyConnection extends Connection {
 
         // Set video state and capabilities
         setVideoState(mOriginalConnection.getVideoState());
-
-        updateAddress();
-
-        updateState();
         setConnectionCapability(mOriginalConnection.getConnectionCapabilities());
         setWifi(mOriginalConnection.isWifi());
         setVideoProvider(mOriginalConnection.getVideoProvider());

@@ -180,6 +180,20 @@ public class IccNetworkDepersonalizationPanel extends IccPanel {
         {R.string.label_puk,                R.string.requesting_puk_unlock,
         R.string.puk_unlock_failed,         R.string.puk_unlock_success},
     };
+    /**
+     * Shows the network depersonalization dialog, but only if it is not already visible.
+     */
+    public static void showDialog() {
+        if (sShowingDialog) {
+            Log.i(TAG, "[IccNetworkDepersonalizationPanel] - showDialog; skipped already shown.");
+            return;
+        }
+        Log.i(TAG, "[IccNetworkDepersonalizationPanel] - showDialog; showing dialog.");
+        sShowingDialog = true;
+        IccNetworkDepersonalizationPanel ndpPanel =
+                new IccNetworkDepersonalizationPanel(PhoneGlobals.getInstance());
+        ndpPanel.show();
+    }
 
     /**
      * Shows the network depersonalization dialog, but only if it is not already visible.
