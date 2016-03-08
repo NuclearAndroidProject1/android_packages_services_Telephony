@@ -74,15 +74,15 @@ abstract class TelephonyConnection extends Connection {
     private static final int MSG_MULTIPARTY_STATE_CHANGED = 5;
     private static final int MSG_CONFERENCE_MERGE_FAILED = 6;
     private static final int MSG_SUPP_SERVICE_NOTIFY = 7;
-    private static final int MSG_CONNECTION_EXTRAS_CHANGED = 8;
-    private static final int MSG_SET_VIDEO_STATE = 9;
-    private static final int MSG_SET_LOCAL_VIDEO_CAPABILITY = 10;
-    private static final int MSG_SET_REMOTE_VIDEO_CAPABILITY = 11;
-    private static final int MSG_SET_VIDEO_PROVIDER = 12;
-    private static final int MSG_SET_AUDIO_QUALITY = 13;
-    private static final int MSG_SET_CONFERENCE_PARTICIPANTS = 14;
-    private static final int MSG_PHONE_VP_ON = 15;
-    private static final int MSG_PHONE_VP_OFF = 16;
+    private static final int MSG_SET_VIDEO_STATE = 8;
+    private static final int MSG_SET_LOCAL_VIDEO_CAPABILITY = 9;
+    private static final int MSG_SET_REMOTE_VIDEO_CAPABILITY = 10;
+    private static final int MSG_SET_VIDEO_PROVIDER = 11;
+    private static final int MSG_SET_AUDIO_QUALITY = 12;
+    private static final int MSG_SET_CONFERENCE_PARTICIPANTS = 13;
+    private static final int MSG_PHONE_VP_ON = 14;
+    private static final int MSG_PHONE_VP_OFF = 15;
+    private static final int MSG_CONNECTION_EXTRAS_CHANGED = 16;
     private static final int MSG_SET_CONNECTION_CAPABILITY = 17;
 
     private boolean mIsVoicePrivacyOn = false;
@@ -150,7 +150,6 @@ abstract class TelephonyConnection extends Connection {
                 case MSG_CONFERENCE_MERGE_FAILED:
                     notifyConferenceMergeFailed();
                     break;
-
                 case MSG_SET_VIDEO_STATE:
                     int videoState = (int) msg.obj;
                     setVideoState(videoState);

@@ -195,21 +195,6 @@ public class IccNetworkDepersonalizationPanel extends IccPanel {
         ndpPanel.show();
     }
 
-    /**
-     * Shows the network depersonalization dialog, but only if it is not already visible.
-     */
-    public static void showDialog() {
-        if (sShowingDialog) {
-            Log.i(TAG, "[IccNetworkDepersonalizationPanel] - showDialog; skipped already shown.");
-            return;
-        }
-        Log.i(TAG, "[IccNetworkDepersonalizationPanel] - showDialog; showing dialog.");
-        sShowingDialog = true;
-        IccNetworkDepersonalizationPanel ndpPanel =
-                new IccNetworkDepersonalizationPanel(PhoneGlobals.getInstance());
-        ndpPanel.show();
-    }
-
     //private textwatcher to control text entry.
     private TextWatcher mPinEntryWatcher = new TextWatcher() {
         public void beforeTextChanged(CharSequence buffer, int start, int olen, int nlen) {

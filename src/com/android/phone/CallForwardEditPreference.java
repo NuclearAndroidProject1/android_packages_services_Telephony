@@ -29,7 +29,6 @@ import android.view.View;
 
 import org.codeaurora.ims.qtiims.IQtiImsInterfaceListener;
 import org.codeaurora.ims.qtiims.IQtiImsInterface;
-import org.codeaurora.ims.qtiims.QtiViceInfo;
 import org.codeaurora.ims.qtiims.QtiImsInterfaceListenerBaseImpl;
 
 import static com.android.phone.TimeConsumingPreferenceActivity.RESPONSE_ERROR;
@@ -300,19 +299,6 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
             if (DBG) Log.d(LOG_TAG, "onUTReqFailed errCode= "+errCode + "errString ="+ errString);
             mTcpListener.onFinished(CallForwardEditPreference.this, true);
             mTcpListener.onError(CallForwardEditPreference.this, RESPONSE_ERROR);
-        }
-
-        public void onGetPacketCount(int status, long packetCount) {
-        }
-
-        public void onGetPacketErrorCount(int status, long packetErrorCount) {
-        }
-
-        public void receiveCallDeflectResponse(int result) {
-            /* Not implemented, dummy implementation to avoid compilation errors */
-        }
-
-        public void notifyRefreshViceInfo(QtiViceInfo qtiViceInfo) {
         }
     };
 

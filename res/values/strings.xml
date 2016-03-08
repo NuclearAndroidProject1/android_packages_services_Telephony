@@ -417,8 +417,8 @@
     <!-- In-call screen: status label for an incoming call that is not answered and forwarded  -->
     <string name="callUnanswered_forwarded">Call Unanswered and Forwarded</string>
 
-     <!-- Mobile network settings, summary for preferred network mode TDSCDMTA [CHAR LIMIT=100] -->
-     <string name="preferred_network_mode_tdscdma_summary">Preferred network mode: TDSCDMA</string>
+        <!-- Mobile network settings, summary for preferred network mode TD-SCDMA only[CHAR LIMIT=100] -->
+    <string name="preferred_network_mode_td_scdma_only_summary">Preferred network mode: TD-SCDMA only</string>
     <!-- Mobile network settings, summary for preferred network mode TD-SCDMA / WCDMA[CHAR LIMIT=100] -->
     <string name="preferred_network_mode_td_scdma_wcdma_summary">Preferred network mode: TD-SCDMA / WCDMA</string>
     <!-- Mobile network settings, summary for preferred network mode TD-SCDMA / LTE[CHAR LIMIT=100] -->
